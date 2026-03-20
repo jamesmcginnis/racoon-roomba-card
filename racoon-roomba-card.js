@@ -27,9 +27,19 @@ const STYLES = `
   /* ── Header ── */
   .rc-header {
     display: flex;
+    flex-direction: column;
+    padding: 8px 14px 0;
+    gap: 3px;
+    cursor: pointer;
+  }
+  .rc-header-top {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .rc-header-bottom {
+    display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 16px 0;
   }
   .rc-title {
     font-size: 12px;
@@ -38,17 +48,16 @@ const STYLES = `
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
-  /* Header right: stacked status pills */
+  /* Header status pills — side by side */
   .rc-header-pills {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
+    flex-direction: row;
     gap: 4px;
   }
 
   /* ── Main row: robot left, info right ── */
   .rc-body {
-    padding: 10px 16px 0;
+    padding: 8px 14px 0;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -202,7 +211,7 @@ const STYLES = `
 
   /* ── Divider ── */
   .rc-divider {
-    margin: 10px 16px 0;
+    margin: 8px 14px 0;
     height: 1px;
     background: var(--divider-color, rgba(0,0,0,0.08));
   }
@@ -211,7 +220,7 @@ const STYLES = `
   .rc-bottom-bar {
     display: flex;
     align-items: center;
-    padding: 8px 12px 12px;
+    padding: 6px 10px 10px;
   }
   /* ── Round control buttons ── */
   .rc-buttons {
@@ -335,12 +344,16 @@ class RacoonRoombaCard extends HTMLElement {
     shadow.innerHTML = `
       <style>${STYLES}</style>
       <ha-card>
-        <div class="rc-header">
-          <span class="rc-title" id="rc-title">${this._config.name}</span>
-          <div class="rc-header-pills">
+        <div class="rc-header" id="rc-header">
+          <div class="rc-header-top">
             <span class="rc-pill rc-pill-conn" id="rc-conn-pill">Connected</span>
-            <span class="rc-pill rc-pill-ok"   id="rc-bin-pill">Bin OK</span>
-            <span class="rc-pill rc-pill-ok"   id="rc-stuck-pill">Not Stuck</span>
+          </div>
+          <div class="rc-header-bottom">
+            <span class="rc-title" id="rc-title">${this._config.name}</span>
+            <div class="rc-header-pills">
+              <span class="rc-pill rc-pill-ok" id="rc-bin-pill">Bin OK</span>
+              <span class="rc-pill rc-pill-ok" id="rc-stuck-pill">Not Stuck</span>
+            </div>
           </div>
         </div>
         <div id="rc-main">
@@ -402,6 +415,15 @@ class RacoonRoombaCard extends HTMLElement {
     shadow.getElementById('rc-btn-dock')  .addEventListener('click', () => call('return_to_base'));
     shadow.getElementById('rc-btn-stop')  .addEventListener('click', () => call('stop'));
     shadow.getElementById('rc-btn-locate').addEventListener('click', () => call('locate'));
+
+    // Tap header → open HA more-info dialog
+    shadow.getElementById('rc-header').addEventListener('click', () => {
+      this.dispatchEvent(new CustomEvent('hass-more-info', {
+        detail: { entityId: this._config.entity },
+        bubbles: true,
+        composed: true,
+      }));
+    });
   }
 
   _update() {

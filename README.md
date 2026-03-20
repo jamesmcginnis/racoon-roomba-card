@@ -18,16 +18,14 @@ A compact, animated Lovelace card for controlling your Roomba from Home Assistan
 
 ## Features
 
-- Compact card that fits naturally in any dashboard layout
-- Animated robot icon and spinning ring when the Roomba is cleaning
-- Live state label: Cleaning, Docked, Returning, Paused, Idle, Stuck
-- Inline stats: mission time, area cleaned, and battery percentage
-- Battery colour shifts to orange below 40% and red below 20%
-- Not Stuck and Bin OK status pills — colour on alert
+- Minimal, compact card that fits naturally in any dashboard layout
+- **Connected** pill on the left, **battery %** pill on the right — turns amber below 40%, red below 20%
+- Animated robot icon with spinning ring while cleaning — breathing + rotation effect
+- Ring colour reflects vacuum state: green cleaning, blue docked, amber returning, red error
+- Device name displayed inside the robot circle
 - Five round control buttons: Start, Pause, Dock, Stop, Find
 - Tap anywhere on the card to open the Home Assistant more-info popup
 - Visual editor — no YAML required for basic setup
-- Connected / Offline status indicator
 
 ---
 
@@ -85,10 +83,6 @@ type: custom:racoon-roomba-card
 entity: vacuum.roomba
 name: Downstairs Roomba
 battery_entity: sensor.roomba_battery
-mission_time_entity: sensor.roomba_mission_time
-area_entity: sensor.roomba_area_cleaned
-bin_entity: binary_sensor.roomba_bin_full
-stuck_entity: binary_sensor.roomba_stuck
 ```
 
 ### Options
@@ -96,12 +90,8 @@ stuck_entity: binary_sensor.roomba_stuck
 | Option | Type | Required | Default | Description |
 |---|---|---|---|---|
 | `entity` | string | ✅ | — | Your `vacuum.*` entity from ha-roomba-custom |
-| `name` | string | | `Roomba` | Display name shown in the card header |
+| `name` | string | | `Roomba` | Display name shown inside the robot circle |
 | `battery_entity` | string | | — | `sensor.*` — overrides built-in battery attribute |
-| `mission_time_entity` | string | | — | `sensor.*` — minutes elapsed this clean |
-| `area_entity` | string | | — | `sensor.*` — square feet / metres cleaned |
-| `bin_entity` | string | | — | `binary_sensor.*` — turns Bin OK pill to Bin Full when `on` |
-| `stuck_entity` | string | | — | `binary_sensor.*` — turns Not Stuck pill to Stuck! when `on` |
 
 ---
 

@@ -21,18 +21,32 @@ const STYLES = `
   /* ── Header ── */
   .rc-header {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 10px 14px 0; cursor: pointer;
+    padding: 10px 12px 0; cursor: pointer; gap: 8px;
   }
-  .rc-name { font-size: 13px; font-weight: 500; color: var(--primary-text-color); }
-  .rc-conn { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--secondary-text-color); }
-  .rc-conn-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--success-color,#1D9E75); transition: background 0.3s; flex-shrink: 0;
+  .rc-name { font-size: 13px; font-weight: 500; color: var(--primary-text-color); flex-shrink: 0; }
+
+  /* Right pill strip */
+  .rc-header-right { display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; }
+
+  /* All pills share one style */
+  .rc-pill {
+    font-size: 9px; padding: 2px 7px; border-radius: 20px;
+    font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+    border: 1px solid; transition: all 0.2s; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 3px;
   }
-  .rc-conn-dot.offline { background: var(--error-color,#E24B4A); }
+  .rc-pill-ok      { background: var(--secondary-background-color); color: var(--secondary-text-color); border-color: var(--divider-color); }
+  .rc-pill-conn    { background: rgba(29,158,117,0.12); color: var(--success-color,#1D9E75); border-color: var(--success-color,#1D9E75); }
+  .rc-pill-offline { background: rgba(226,75,74,0.1); color: var(--error-color,#E24B4A); border-color: var(--error-color,#E24B4A); }
+  .rc-pill-warn    { background: #FAEEDA; color: #633806; border-color: #EF9F27; }
+  .rc-pill-bad     { background: #FCEBEB; color: #791F1F; border-color: #E24B4A; }
+
+  /* Battery pill uses a tiny inline SVG bar */
+  .rc-bat-bar-bg   { fill: none; }
+  .rc-bat-bar-fill { transition: width 0.4s; }
 
   /* ── Body ── */
-  .rc-body { display: flex; align-items: center; gap: 12px; padding: 8px 14px 10px; }
+  .rc-body { display: flex; align-items: center; gap: 12px; padding: 8px 12px 10px; }
 
   /* Robot circle */
   .rc-robot-wrap { position: relative; flex-shrink: 0; width: 64px; height: 64px; }
@@ -72,35 +86,11 @@ const STYLES = `
   .rc-state-error     { color: var(--error-color,#E24B4A); }
   .rc-state-idle      { color: var(--disabled-text-color); }
 
-  /* Info column */
-  .rc-info { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-
-  /* State + battery on one row */
-  .rc-status-row {
-    display: flex; align-items: baseline; justify-content: space-between; gap: 6px;
-  }
+  /* State text beside robot */
   .rc-state-text { font-size: 15px; font-weight: 500; transition: color 0.3s; }
-  .rc-bat {
-    display: flex; align-items: center; gap: 3px;
-    font-size: 12px; font-weight: 500;
-    transition: color 0.4s;
-    flex-shrink: 0;
-  }
-  .rc-bat-icon { opacity: 0.6; }
-
-  /* Pills */
-  .rc-pills-row { display: flex; gap: 5px; flex-wrap: wrap; }
-  .rc-pill {
-    font-size: 10px; padding: 2px 8px; border-radius: 20px;
-    font-weight: 600; letter-spacing: 0.03em; border: 1px solid;
-    transition: all 0.2s; white-space: nowrap;
-  }
-  .rc-pill-ok   { background: var(--secondary-background-color); color: var(--secondary-text-color); border-color: var(--divider-color); }
-  .rc-pill-warn { background: #FAEEDA; color: #633806; border-color: #EF9F27; }
-  .rc-pill-bad  { background: #FCEBEB; color: #791F1F; border-color: #E24B4A; }
 
   /* Divider + buttons */
-  .rc-divider { height: 1px; background: var(--divider-color,rgba(0,0,0,0.08)); margin: 0 14px; }
+  .rc-divider { height: 1px; background: var(--divider-color,rgba(0,0,0,0.08)); margin: 0 12px; }
   .rc-buttons { display: flex; justify-content: space-around; padding: 6px 10px 8px; }
   .rc-btn {
     width: 38px; height: 38px; border-radius: 50%;
@@ -183,10 +173,12 @@ class RacoonRoombaCard extends HTMLElement {
       <ha-card>
         <div class="rc-header" id="rc-header">
           <span class="rc-name" id="rc-title">${this._config.name}</span>
-          <span class="rc-conn">
-            <span class="rc-conn-dot" id="rc-dot"></span>
-            <span id="rc-conn-txt">Connecting…</span>
-          </span>
+          <div class="rc-header-right">
+            <span class="rc-pill rc-pill-ok" id="rc-bat-pill">— %</span>
+            <span class="rc-pill rc-pill-ok" id="rc-stuck-pill">Not Stuck</span>
+            <span class="rc-pill rc-pill-ok" id="rc-bin-pill">Bin OK</span>
+            <span class="rc-pill rc-pill-conn" id="rc-conn-pill">Connected</span>
+          </div>
         </div>
         <div class="rc-body">
           <div class="rc-robot-wrap">
@@ -197,23 +189,7 @@ class RacoonRoombaCard extends HTMLElement {
               <span class="rc-state-badge" id="rc-state-lbl">—</span>
             </div>
           </div>
-          <div class="rc-info">
-            <div class="rc-status-row">
-              <span class="rc-state-text rc-state-idle" id="rc-state-text">—</span>
-              <span class="rc-bat" id="rc-bat">
-                <svg class="rc-bat-icon" viewBox="0 0 16 10" width="14" height="10" fill="none">
-                  <rect x="0.5" y="0.5" width="13" height="9" rx="1.5" stroke="currentColor" stroke-opacity="0.5"/>
-                  <rect id="rc-bat-fill-rect" x="2" y="2" width="8" height="6" rx="0.75" fill="currentColor"/>
-                  <path d="M14.5 3.5v3" stroke="currentColor" stroke-opacity="0.5" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
-                <span id="rc-bat-pct">—</span>
-              </span>
-            </div>
-            <div class="rc-pills-row">
-              <span class="rc-pill rc-pill-ok" id="rc-stuck-pill">Not Stuck</span>
-              <span class="rc-pill rc-pill-ok" id="rc-bin-pill">Bin OK</span>
-            </div>
-          </div>
+          <span class="rc-state-text rc-state-idle" id="rc-state-text">—</span>
         </div>
         <div class="rc-divider"></div>
         <div class="rc-buttons">
@@ -225,7 +201,6 @@ class RacoonRoombaCard extends HTMLElement {
         </div>
       </ha-card>
     `;
-
         const call = (svc) => {
       if (!this._hass) return;
       this._hass.callService('vacuum', svc, { entity_id: this._config.entity });
@@ -264,9 +239,25 @@ class RacoonRoombaCard extends HTMLElement {
     const info      = getStateInfo(state);
     const available = state !== 'unavailable';
 
-    // Connection
-    shadow.getElementById('rc-dot').className        = 'rc-conn-dot' + (available ? '' : ' offline');
-    shadow.getElementById('rc-conn-txt').textContent = available ? 'Connected' : 'Offline';
+    // Connected pill
+    const connPill = shadow.getElementById('rc-conn-pill');
+    connPill.className   = 'rc-pill ' + (available ? 'rc-pill-conn' : 'rc-pill-offline');
+    connPill.textContent = available ? 'Connected' : 'Offline';
+
+    // Battery pill
+    const batEnt  = cfg.battery_entity ? hass.states[cfg.battery_entity] : null;
+    const batPct  = batEnt ? parseInt(batEnt.state) : attrs.battery_level;
+    const batPill = shadow.getElementById('rc-bat-pill');
+    if (batPct != null && !isNaN(batPct)) {
+      const colour = batPct > 40 ? 'rc-pill-ok'
+                   : batPct > 20 ? 'rc-pill-warn'
+                                 : 'rc-pill-bad';
+      batPill.className   = 'rc-pill ' + colour;
+      batPill.textContent = batPct + '%';
+    } else {
+      batPill.className   = 'rc-pill rc-pill-ok';
+      batPill.textContent = '—';
+    }
 
     // Ring + badge in circle
     shadow.getElementById('rc-ring').className = 'rc-ring rc-ring-active ' + (info.ring || '');
@@ -280,27 +271,6 @@ class RacoonRoombaCard extends HTMLElement {
     const stateText = shadow.getElementById('rc-state-text');
     stateText.className   = 'rc-state-text ' + info.cls;
     stateText.textContent = info.label;
-
-    // Battery — icon fill + coloured % text
-    const batEnt = cfg.battery_entity ? hass.states[cfg.battery_entity] : null;
-    const batPct = batEnt ? parseInt(batEnt.state) : attrs.battery_level;
-    const batEl  = shadow.getElementById('rc-bat-pct');
-    const batWrap = shadow.getElementById('rc-bat');
-    const fillRect = shadow.getElementById('rc-bat-fill-rect');
-    if (batPct != null && !isNaN(batPct)) {
-      batEl.textContent = batPct + '%';
-      const fillW = Math.max(0, Math.round(batPct / 100 * 8));
-      if (fillRect) fillRect.setAttribute('width', fillW);
-      const colour = batPct > 40
-        ? 'var(--secondary-text-color)'
-        : batPct > 20
-          ? 'var(--warning-color,#BA7517)'
-          : 'var(--error-color,#E24B4A)';
-      if (batWrap) batWrap.style.color = colour;
-    } else {
-      batEl.textContent = '—';
-      if (batWrap) batWrap.style.color = 'var(--secondary-text-color)';
-    }
 
     // Stuck pill
     const stuckEnt  = cfg.stuck_entity ? hass.states[cfg.stuck_entity] : null;

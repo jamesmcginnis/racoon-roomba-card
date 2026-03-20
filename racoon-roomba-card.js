@@ -22,9 +22,6 @@ const STYLES = `
     padding: 8px 12px 0; cursor: pointer; gap: 8px;
   }
 
-  /* Right pill strip */
-  .rc-header-right { display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; }
-
   /* All pills */
   .rc-pill {
     font-size: 9px; padding: 2px 7px; border-radius: 20px;
@@ -158,10 +155,8 @@ class RacoonRoombaCard extends HTMLElement {
       <style>${STYLES}</style>
       <ha-card>
         <div class="rc-header" id="rc-header">
-          <div class="rc-header-right">
-            <span class="rc-pill rc-pill-conn"  id="rc-conn-pill">Connected</span>
-            <span class="rc-pill rc-pill-ok"   id="rc-bat-pill">—</span>
-          </div>
+          <span class="rc-pill rc-pill-conn" id="rc-conn-pill">Connected</span>
+          <span class="rc-pill rc-pill-ok"   id="rc-bat-pill">—</span>
         </div>
         <div class="rc-body">
           <div class="rc-robot-wrap">

@@ -24,35 +24,30 @@ const STYLES = `
     font-family: var(--primary-font-family, sans-serif);
   }
 
-  /* ── Header ── */
+  /* ── Header: name+conn on top row, pills stacked below right ── */
   .rc-header {
     display: flex;
-    flex-direction: column;
-    padding: 8px 14px 0;
-    gap: 3px;
-    cursor: pointer;
-  }
-  .rc-header-top {
-    display: flex;
-    justify-content: flex-end;
-  }
-  .rc-header-bottom {
-    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
     justify-content: space-between;
-    align-items: center;
+    padding: 8px 14px 0;
+    gap: 6px;
+    cursor: pointer;
   }
   .rc-title {
     font-size: 12px;
     font-weight: 500;
     color: var(--secondary-text-color);
     letter-spacing: 0.04em;
-    text-transform: uppercase;
+    padding-top: 2px;
   }
-  /* Header status pills — side by side */
+  /* Right column: stacked pills */
   .rc-header-pills {
     display: flex;
-    flex-direction: row;
-    gap: 4px;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+    flex-shrink: 0;
   }
 
   /* ── Main row: robot left, info right ── */
@@ -345,15 +340,11 @@ class RacoonRoombaCard extends HTMLElement {
       <style>${STYLES}</style>
       <ha-card>
         <div class="rc-header" id="rc-header">
-          <div class="rc-header-top">
+          <span class="rc-title" id="rc-title">${this._config.name}</span>
+          <div class="rc-header-pills">
             <span class="rc-pill rc-pill-conn" id="rc-conn-pill">Connected</span>
-          </div>
-          <div class="rc-header-bottom">
-            <span class="rc-title" id="rc-title">${this._config.name}</span>
-            <div class="rc-header-pills">
-              <span class="rc-pill rc-pill-ok" id="rc-bin-pill">Bin OK</span>
-              <span class="rc-pill rc-pill-ok" id="rc-stuck-pill">Not Stuck</span>
-            </div>
+            <span class="rc-pill rc-pill-ok"   id="rc-bin-pill">Bin OK</span>
+            <span class="rc-pill rc-pill-ok"   id="rc-stuck-pill">Not Stuck</span>
           </div>
         </div>
         <div id="rc-main">

@@ -275,13 +275,21 @@ class RacoonRoombaCard extends HTMLElement {
       if (!this._hass) return;
       this._hass.callService('vacuum', svc, { entity_id: this._config.entity });
     };
-    shadow.getElementById('rc-btn-start') .addEventListener('click', () => call('start'));
-    shadow.getElementById('rc-btn-pause') .addEventListener('click', () => call('pause'));
-    shadow.getElementById('rc-btn-dock')  .addEventListener('click', () => call('return_to_base'));
-    shadow.getElementById('rc-btn-stop')  .addEventListener('click', () => call('stop'));
-    shadow.getElementById('rc-btn-locate').addEventListener('click', () => call('locate'));
+    // Buttons — call service and stop the event bubbling to the card click handler
+    const btn = (id, svc) => {
+      shadow.getElementById(id).addEventListener('click', (e) => {
+        e.stopPropagation();
+        call(svc);
+      });
+    };
+    btn('rc-btn-start',  'start');
+    btn('rc-btn-pause',  'pause');
+    btn('rc-btn-dock',   'return_to_base');
+    btn('rc-btn-stop',   'stop');
+    btn('rc-btn-locate', 'locate');
 
-    shadow.getElementById('rc-header').addEventListener('click', () => {
+    // Tapping anywhere on the card opens the HA more-info dialog
+    shadow.querySelector('ha-card').addEventListener('click', () => {
       this.dispatchEvent(new CustomEvent('hass-more-info', {
         detail: { entityId: this._config.entity },
         bubbles: true, composed: true,

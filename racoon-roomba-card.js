@@ -159,8 +159,8 @@ class RacoonRoombaCard extends HTMLElement {
       <ha-card>
         <div class="rc-header" id="rc-header">
           <div class="rc-header-right">
-            <span class="rc-pill rc-pill-ok"   id="rc-bat-pill">—</span>
             <span class="rc-pill rc-pill-conn"  id="rc-conn-pill">Connected</span>
+            <span class="rc-pill rc-pill-ok"   id="rc-bat-pill">—</span>
           </div>
         </div>
         <div class="rc-body">

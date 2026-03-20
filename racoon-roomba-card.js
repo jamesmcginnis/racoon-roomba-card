@@ -23,14 +23,16 @@ const STYLES = `
     overflow: hidden;
     font-family: var(--primary-font-family, sans-serif);
   }
+
+  /* ── Header ── */
   .rc-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 14px 18px 0;
+    padding: 10px 16px 0;
   }
   .rc-title {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     color: var(--secondary-text-color);
     letter-spacing: 0.04em;
@@ -50,16 +52,21 @@ const STYLES = `
     transition: background 0.3s;
   }
   .rc-conn-dot.offline { background: var(--error-color, #E24B4A); }
+
+  /* ── Main row: robot left, info right ── */
   .rc-body {
-    padding: 20px 18px 14px;
+    padding: 10px 16px 0;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 16px;
+    gap: 14px;
   }
+
+  /* Robot circle */
   .rc-robot-wrap {
     position: relative;
-    width: 120px; height: 120px;
+    flex-shrink: 0;
+    width: 90px; height: 90px;
   }
   .rc-ring {
     position: absolute; inset: 0;
@@ -98,7 +105,7 @@ const STYLES = `
   @keyframes rc-spin  { to { transform: rotate(360deg); } }
   @keyframes rc-flash { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
   .rc-robot-inner {
-    position: absolute; inset: 8px;
+    position: absolute; inset: 7px;
     border-radius: 50%;
     background: var(--card-background-color, #fff);
     border: 1px solid var(--divider-color, rgba(0,0,0,0.12));
@@ -110,7 +117,7 @@ const STYLES = `
     cursor: default;
   }
   .rc-state-lbl {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 600;
     letter-spacing: 0.07em;
     text-transform: uppercase;
@@ -122,30 +129,59 @@ const STYLES = `
   .rc-state-paused    { color: var(--secondary-text-color); }
   .rc-state-error     { color: var(--error-color, #E24B4A); }
   .rc-state-idle      { color: var(--disabled-text-color); }
-  .rc-metrics {
+
+  /* Info column (right of robot) */
+  .rc-info {
+    flex: 1;
     display: flex;
-    gap: 20px;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+  .rc-info-row {
+    display: flex;
     align-items: center;
+    gap: 10px;
   }
   .rc-metric {
     display: flex; flex-direction: column;
-    align-items: center; gap: 2px;
+    gap: 1px;
   }
   .rc-metric-val {
-    font-size: 18px; font-weight: 500;
+    font-size: 16px; font-weight: 500;
     color: var(--primary-text-color);
+    line-height: 1;
   }
   .rc-metric-lbl {
-    font-size: 10px;
+    font-size: 9px;
     color: var(--disabled-text-color);
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
+  .rc-metric-divider {
+    width: 1px; height: 28px;
+    background: var(--divider-color, rgba(0,0,0,0.1));
+    flex-shrink: 0;
+  }
   .rc-battery-wrap {
-    display: flex; align-items: center; gap: 8px;
+    display: flex; flex-direction: column; gap: 3px;
+    flex: 1;
+  }
+  .rc-battery-top {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .rc-battery-lbl {
+    font-size: 9px;
+    color: var(--disabled-text-color);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .rc-battery-pct {
+    font-size: 12px; font-weight: 500;
+    color: var(--primary-text-color);
   }
   .rc-battery-bar {
-    width: 60px; height: 6px;
+    width: 100%; height: 5px;
     background: var(--divider-color, rgba(0,0,0,0.12));
     border-radius: 3px; overflow: hidden;
   }
@@ -153,58 +189,63 @@ const STYLES = `
     height: 100%; border-radius: 3px;
     transition: width 0.4s, background 0.4s;
   }
-  .rc-battery-pct {
-    font-size: 12px; font-weight: 500;
-    color: var(--primary-text-color);
-    min-width: 32px;
-  }
-  .rc-divider {
-    width: 100%; height: 1px;
-    background: var(--divider-color, rgba(0,0,0,0.08));
-  }
-  .rc-buttons {
-    display: flex; gap: 6px;
-    width: 100%; justify-content: center;
-  }
-  .rc-btn {
-    flex: 1;
-    padding: 9px 4px;
-    border: 1px solid var(--divider-color, rgba(0,0,0,0.15));
-    border-radius: 8px;
-    background: var(--secondary-background-color, #f5f5f5);
-    color: var(--primary-text-color);
-    cursor: pointer;
-    font-size: 10px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    font-weight: 500;
-    display: flex; flex-direction: column;
-    align-items: center; gap: 4px;
-    transition: background 0.12s, transform 0.1s;
-    font-family: inherit;
-  }
-  .rc-btn:hover   { background: var(--divider-color, rgba(0,0,0,0.1)); }
-  .rc-btn:active  { transform: scale(0.95); }
-  .rc-btn[disabled] { opacity: 0.4; cursor: not-allowed; }
-  .rc-btn.rc-btn-locate { color: var(--info-color, #378ADD); }
-  .rc-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  /* Status pills */
   .rc-pills {
-    display: flex; gap: 6px;
+    display: flex; gap: 5px;
   }
   .rc-pill {
-    font-size: 10px; padding: 3px 9px;
+    font-size: 9px; padding: 2px 7px;
     border-radius: 20px;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    font-weight: 500;
+    font-weight: 600;
     border: 1px solid;
     transition: all 0.2s;
+    white-space: nowrap;
   }
   .rc-pill-ok   { background: var(--secondary-background-color); color: var(--disabled-text-color); border-color: var(--divider-color); }
   .rc-pill-warn { background: #FAEEDA; color: #633806; border-color: #EF9F27; }
   .rc-pill-bad  { background: #FCEBEB; color: #791F1F; border-color: #E24B4A; }
+
+  /* ── Divider ── */
+  .rc-divider {
+    margin: 10px 16px 0;
+    height: 1px;
+    background: var(--divider-color, rgba(0,0,0,0.08));
+  }
+
+  /* ── Round control buttons ── */
+  .rc-buttons {
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 12px 12px;
+  }
+  .rc-btn {
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    border: 1px solid var(--divider-color, rgba(0,0,0,0.15));
+    background: var(--secondary-background-color, #f5f5f5);
+    color: var(--primary-text-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.12s, transform 0.1s, box-shadow 0.12s;
+    font-family: inherit;
+    padding: 0;
+  }
+  .rc-btn:hover {
+    background: var(--divider-color, rgba(0,0,0,0.1));
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  .rc-btn:active  { transform: scale(0.91); }
+  .rc-btn[disabled] { opacity: 0.35; cursor: not-allowed; }
+  .rc-btn.rc-btn-locate { color: var(--info-color, #378ADD); }
+  .rc-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
   .rc-unavail {
-    padding: 24px 18px;
+    padding: 20px 16px;
     text-align: center;
     color: var(--disabled-text-color);
     font-size: 13px;
@@ -296,50 +337,42 @@ class RacoonRoombaCard extends HTMLElement {
                 <span class="rc-state-lbl" id="rc-state-lbl">—</span>
               </div>
             </div>
-
-            <div class="rc-metrics">
-              <div class="rc-metric">
-                <span class="rc-metric-val" id="rc-mssn">—</span>
-                <span class="rc-metric-lbl">Minutes</span>
-              </div>
-              <div class="rc-battery-wrap">
-                <div class="rc-battery-bar">
-                  <div class="rc-battery-fill" id="rc-bat-fill" style="width:0%"></div>
+            <div class="rc-info">
+              <div class="rc-info-row">
+                <div class="rc-metric">
+                  <span class="rc-metric-val" id="rc-mssn">—</span>
+                  <span class="rc-metric-lbl">Min</span>
                 </div>
-                <span class="rc-battery-pct" id="rc-bat-pct">—</span>
+                <div class="rc-metric-divider"></div>
+                <div class="rc-metric">
+                  <span class="rc-metric-val" id="rc-sqft">—</span>
+                  <span class="rc-metric-lbl">Sq ft</span>
+                </div>
+                <div class="rc-metric-divider"></div>
+                <div class="rc-battery-wrap">
+                  <div class="rc-battery-top">
+                    <span class="rc-battery-lbl">Battery</span>
+                    <span class="rc-battery-pct" id="rc-bat-pct">—</span>
+                  </div>
+                  <div class="rc-battery-bar">
+                    <div class="rc-battery-fill" id="rc-bat-fill" style="width:0%"></div>
+                  </div>
+                </div>
               </div>
-              <div class="rc-metric">
-                <span class="rc-metric-val" id="rc-sqft">—</span>
-                <span class="rc-metric-lbl">Sq ft</span>
+              <div class="rc-pills">
+                <span class="rc-pill rc-pill-ok" id="rc-bin-pill">Bin OK</span>
+                <span class="rc-pill rc-pill-ok" id="rc-stuck-pill">Not Stuck</span>
               </div>
-            </div>
-
-            <div class="rc-divider"></div>
-
-            <div class="rc-buttons">
-              <button class="rc-btn" id="rc-btn-start"  title="Start cleaning">
-                ${SVG.start}Start
-              </button>
-              <button class="rc-btn" id="rc-btn-pause"  title="Pause">
-                ${SVG.pause}Pause
-              </button>
-              <button class="rc-btn" id="rc-btn-dock"   title="Return to dock">
-                ${SVG.dock}Dock
-              </button>
-              <button class="rc-btn" id="rc-btn-stop"   title="Stop">
-                ${SVG.stop}Stop
-              </button>
-              <button class="rc-btn rc-btn-locate" id="rc-btn-locate" title="Locate (beep)">
-                ${SVG.locate}Find
-              </button>
-            </div>
-
-            <div class="rc-pills">
-              <span class="rc-pill rc-pill-ok" id="rc-bin-pill">Bin OK</span>
-              <span class="rc-pill rc-pill-ok" id="rc-stuck-pill">Not Stuck</span>
             </div>
           </div>
-
+          <div class="rc-divider"></div>
+          <div class="rc-buttons">
+            <button class="rc-btn" id="rc-btn-start"  title="Start cleaning">${SVG.start}</button>
+            <button class="rc-btn" id="rc-btn-pause"  title="Pause">${SVG.pause}</button>
+            <button class="rc-btn" id="rc-btn-dock"   title="Return to dock">${SVG.dock}</button>
+            <button class="rc-btn" id="rc-btn-stop"   title="Stop">${SVG.stop}</button>
+            <button class="rc-btn rc-btn-locate" id="rc-btn-locate" title="Locate (beep)">${SVG.locate}</button>
+          </div>
         </div>
       </ha-card>
     `;

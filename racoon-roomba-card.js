@@ -203,14 +203,6 @@ const STYLES = `
   .rc-pill-ok   { background: var(--secondary-background-color); color: var(--disabled-text-color); border-color: var(--divider-color); }
   .rc-pill-warn { background: #FAEEDA; color: #633806; border-color: #EF9F27; }
   .rc-pill-bad  { background: #FCEBEB; color: #791F1F; border-color: #E24B4A; }
-  .rc-footer {
-    padding: 0 18px 14px;
-  }
-  .rc-lastcmd {
-    font-size: 11px;
-    color: var(--disabled-text-color);
-  }
-  .rc-lastcmd span { color: var(--secondary-text-color); font-weight: 500; }
   .rc-unavail {
     padding: 24px 18px;
     text-align: center;
@@ -348,11 +340,6 @@ class RacoonRoombaCard extends HTMLElement {
             </div>
           </div>
 
-          <div class="rc-footer">
-            <div class="rc-lastcmd">
-              Last command: <span id="rc-last-cmd">—</span>
-            </div>
-          </div>
         </div>
       </ha-card>
     `;
@@ -432,10 +419,6 @@ class RacoonRoombaCard extends HTMLElement {
     const stuckPill = shadow.getElementById('rc-stuck-pill');
     stuckPill.className   = 'rc-pill ' + (stuck ? 'rc-pill-bad' : 'rc-pill-ok');
     stuckPill.textContent = stuck ? 'Stuck!' : 'Not Stuck';
-
-    // Last command
-    const lastCmd = attrs.last_command || '—';
-    shadow.getElementById('rc-last-cmd').textContent = lastCmd;
 
     // Disable buttons when unavailable
     ['start','pause','dock','stop','locate'].forEach(id => {
@@ -639,55 +622,6 @@ class RacoonRoombaCardEditor extends HTMLElement {
           </div>
         </div>
 
-        <!-- Optional Sensor Entities -->
-        <div>
-          <div class="section-title">Optional Sensors</div>
-          <div class="card-block">
-            <div class="select-row">
-              <label for="battery_entity">Battery Level</label>
-              <div class="hint">sensor.* — overrides built-in battery attribute</div>
-              <select id="battery_entity">
-                ${this._optionList('sensor')}
-              </select>
-            </div>
-            <div class="select-row">
-              <label for="mission_time_entity">Mission Time</label>
-              <div class="hint">sensor.* — minutes elapsed during current clean</div>
-              <select id="mission_time_entity">
-                ${this._optionList('sensor')}
-              </select>
-            </div>
-            <div class="select-row">
-              <label for="area_entity">Area Cleaned</label>
-              <div class="hint">sensor.* — square feet / metres cleaned this run</div>
-              <select id="area_entity">
-                ${this._optionList('sensor')}
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <!-- Optional Binary Sensors -->
-        <div>
-          <div class="section-title">Optional Binary Sensors</div>
-          <div class="card-block">
-            <div class="select-row">
-              <label for="bin_entity">Bin Full</label>
-              <div class="hint">binary_sensor.* — shows Bin Full warning pill when on</div>
-              <select id="bin_entity">
-                ${this._optionList('binary_sensor')}
-              </select>
-            </div>
-            <div class="select-row">
-              <label for="stuck_entity">Robot Stuck</label>
-              <div class="hint">binary_sensor.* — shows Stuck! warning pill when on</div>
-              <select id="stuck_entity">
-                ${this._optionList('binary_sensor')}
-              </select>
-            </div>
-          </div>
-        </div>
-
       </div>
     `;
 
@@ -706,13 +640,8 @@ class RacoonRoombaCardEditor extends HTMLElement {
       if (el) el.value = val || '';
     };
 
-    set('name',                this._config.name);
-    set('entity',              this._config.entity);
-    set('battery_entity',      this._config.battery_entity);
-    set('mission_time_entity', this._config.mission_time_entity);
-    set('area_entity',         this._config.area_entity);
-    set('bin_entity',          this._config.bin_entity);
-    set('stuck_entity',        this._config.stuck_entity);
+    set('name',   this._config.name);
+    set('entity', this._config.entity);
   }
 
   // ── Event wiring ───────────────────────────────────────────────────────────
@@ -730,13 +659,8 @@ class RacoonRoombaCardEditor extends HTMLElement {
       });
     };
 
-    wire('name',                'name');
-    wire('entity',              'entity');
-    wire('battery_entity',      'battery_entity',      v => v || null);
-    wire('mission_time_entity', 'mission_time_entity', v => v || null);
-    wire('area_entity',         'area_entity',         v => v || null);
-    wire('bin_entity',          'bin_entity',          v => v || null);
-    wire('stuck_entity',        'stuck_entity',        v => v || null);
+    wire('name',   'name');
+    wire('entity', 'entity');
   }
 
   _set(key, value) {

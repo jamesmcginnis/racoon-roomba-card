@@ -2,7 +2,7 @@
 
 A compact, animated Lovelace card for controlling your Roomba vacuum from Home Assistant.
 
-> ⚠️ **This card requires the [ha-roomba-custom](https://github.com/jamesmcginnis/ha-roomba-custom) integration.** Install it before adding this card.
+> ⚠️ **This card requires this [ha-roomba-custom](https://github.com/jamesmcginnis/ha-roomba-custom) integration.** Install it before adding this card.
 
 ---
 
@@ -13,11 +13,10 @@ A compact, animated Lovelace card for controlling your Roomba vacuum from Home A
 
 ## What it does
 
-- Animated spinning icon and ring while the Roomba is cleaning
-- Live state display: Cleaning, Docked, Returning, Paused, Idle, Stuck
-- Inline stats: mission time · area cleaned · battery %
-- Battery % turns orange below 40%, red below 20%
-- **Not Stuck** and **Bin OK** status pills that alert when needed
+- **Connected** pill on the left, **battery %** pill on the right — colour shifts amber below 40%, red below 20%
+- Animated robot icon with spinning ring while cleaning
+- Ring colour reflects state: green cleaning, blue docked, amber returning, red error
+- Device name displayed inside the robot circle
 - Five round control buttons: Start, Pause, Dock, Stop, Find
 - Tap anywhere on the card to open the HA more-info popup
 - Visual editor — no YAML needed for basic setup
@@ -27,6 +26,8 @@ A compact, animated Lovelace card for controlling your Roomba vacuum from Home A
 This card is built exclusively for the **ha-roomba-custom** integration:
 
 👉 [github.com/jamesmcginnis/ha-roomba-custom](https://github.com/jamesmcginnis/ha-roomba-custom)
+
+## Install via HACS
 
 [![Add to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=jamesmcginnis&repository=racoon-roomba-card&category=plugin)
 

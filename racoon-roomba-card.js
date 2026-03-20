@@ -104,6 +104,13 @@ const STYLES = `
   }
   @keyframes rc-spin  { to { transform: rotate(360deg); } }
   @keyframes rc-flash { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+  @keyframes rc-icon-clean {
+    0%   { transform: rotate(0deg)   scale(1);    opacity: 1;    }
+    25%  { transform: rotate(90deg)  scale(1.13); opacity: 0.78; }
+    50%  { transform: rotate(180deg) scale(1);    opacity: 1;    }
+    75%  { transform: rotate(270deg) scale(1.13); opacity: 0.78; }
+    100% { transform: rotate(360deg) scale(1);    opacity: 1;    }
+  }
   .rc-robot-inner {
     position: absolute; inset: 7px;
     border-radius: 50%;
@@ -115,6 +122,16 @@ const STYLES = `
     justify-content: center;
     gap: 3px;
     cursor: default;
+  }
+  #rc-robot-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform-origin: center center;
+    transition: opacity 0.4s;
+  }
+  #rc-robot-icon.cleaning {
+    animation: rc-icon-clean 2.8s ease-in-out infinite;
   }
   .rc-state-lbl {
     font-size: 9px;
@@ -190,9 +207,35 @@ const STYLES = `
     transition: width 0.4s, background 0.4s;
   }
 
+  /* ── Divider ── */
+  .rc-divider {
+    margin: 10px 16px 0;
+    height: 1px;
+    background: var(--divider-color, rgba(0,0,0,0.08));
+  }
+
+  /* ── Bottom bar: buttons + pills ── */
+  .rc-bottom-bar {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px 12px;
+    gap: 8px;
+  }
+  /* ── Round control buttons ── */
+  .rc-buttons {
+    display: flex;
+    justify-content: space-around;
+    flex: 1;
+    gap: 0;
+  }
+
   /* Status pills */
   .rc-pills {
-    display: flex; gap: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-end;
+    flex-shrink: 0;
   }
   .rc-pill {
     font-size: 9px; padding: 2px 7px;
@@ -207,20 +250,6 @@ const STYLES = `
   .rc-pill-ok   { background: var(--secondary-background-color); color: var(--disabled-text-color); border-color: var(--divider-color); }
   .rc-pill-warn { background: #FAEEDA; color: #633806; border-color: #EF9F27; }
   .rc-pill-bad  { background: #FCEBEB; color: #791F1F; border-color: #E24B4A; }
-
-  /* ── Divider ── */
-  .rc-divider {
-    margin: 10px 16px 0;
-    height: 1px;
-    background: var(--divider-color, rgba(0,0,0,0.08));
-  }
-
-  /* ── Round control buttons ── */
-  .rc-buttons {
-    display: flex;
-    justify-content: space-around;
-    padding: 8px 12px 12px;
-  }
   .rc-btn {
     width: 46px; height: 46px;
     border-radius: 50%;
@@ -260,14 +289,14 @@ const SVG = {
   locate: `<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M8 1v3M8 12v3M1 8h3M12 8h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
 };
 
-const ROBOT_SVG = `<svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+const ROBOT_SVG = `<span id="rc-robot-icon"><svg width="36" height="36" viewBox="0 0 36 36" fill="none">
   <circle cx="18" cy="18" r="14" fill="none" stroke="var(--divider-color,rgba(0,0,0,0.2))" stroke-width="1.2"/>
   <circle cx="18" cy="18" r="8" fill="var(--divider-color,rgba(0,0,0,0.1))"/>
   <circle cx="18" cy="18" r="3" fill="var(--secondary-text-color,#888)"/>
   <circle cx="18" cy="9"  r="2" fill="var(--secondary-text-color,#888)" opacity="0.6"/>
   <rect x="8"  y="22" width="4" height="2" rx="1" fill="var(--secondary-text-color,#888)" opacity="0.5"/>
   <rect x="24" y="22" width="4" height="2" rx="1" fill="var(--secondary-text-color,#888)" opacity="0.5"/>
-</svg>`;
+</svg></span>`;
 
 // Map HA vacuum states → display info
 function getStateInfo(state) {
@@ -332,7 +361,7 @@ class RacoonRoombaCard extends HTMLElement {
             <div class="rc-robot-wrap">
               <div class="rc-ring rc-ring-bg"></div>
               <div class="rc-ring rc-ring-active" id="rc-ring"></div>
-              <div class="rc-robot-inner">
+              <div class="rc-robot-inner" id="rc-robot-inner">
                 ${ROBOT_SVG}
                 <span class="rc-state-lbl" id="rc-state-lbl">—</span>
               </div>
@@ -359,19 +388,21 @@ class RacoonRoombaCard extends HTMLElement {
                   </div>
                 </div>
               </div>
-              <div class="rc-pills">
-                <span class="rc-pill rc-pill-ok" id="rc-bin-pill">Bin OK</span>
-                <span class="rc-pill rc-pill-ok" id="rc-stuck-pill">Not Stuck</span>
-              </div>
             </div>
           </div>
           <div class="rc-divider"></div>
-          <div class="rc-buttons">
-            <button class="rc-btn" id="rc-btn-start"  title="Start cleaning">${SVG.start}</button>
-            <button class="rc-btn" id="rc-btn-pause"  title="Pause">${SVG.pause}</button>
-            <button class="rc-btn" id="rc-btn-dock"   title="Return to dock">${SVG.dock}</button>
-            <button class="rc-btn" id="rc-btn-stop"   title="Stop">${SVG.stop}</button>
-            <button class="rc-btn rc-btn-locate" id="rc-btn-locate" title="Locate (beep)">${SVG.locate}</button>
+          <div class="rc-bottom-bar">
+            <div class="rc-buttons">
+              <button class="rc-btn" id="rc-btn-start"  title="Start cleaning">${SVG.start}</button>
+              <button class="rc-btn" id="rc-btn-pause"  title="Pause">${SVG.pause}</button>
+              <button class="rc-btn" id="rc-btn-dock"   title="Return to dock">${SVG.dock}</button>
+              <button class="rc-btn" id="rc-btn-stop"   title="Stop">${SVG.stop}</button>
+              <button class="rc-btn rc-btn-locate" id="rc-btn-locate" title="Locate (beep)">${SVG.locate}</button>
+            </div>
+            <div class="rc-pills">
+              <span class="rc-pill rc-pill-ok" id="rc-bin-pill">Bin OK</span>
+              <span class="rc-pill rc-pill-ok" id="rc-stuck-pill">Not Stuck</span>
+            </div>
           </div>
         </div>
       </ha-card>
@@ -409,6 +440,7 @@ class RacoonRoombaCard extends HTMLElement {
 
     // Ring + state label
     shadow.getElementById('rc-ring').className      = 'rc-ring rc-ring-active ' + (info.ring || '');
+    const icon = shadow.getElementById('rc-robot-icon'); if (icon) icon.className = state === 'cleaning' ? 'cleaning' : '';
     const lbl = shadow.getElementById('rc-state-lbl');
     lbl.className   = 'rc-state-lbl ' + info.cls;
     lbl.textContent = info.label;

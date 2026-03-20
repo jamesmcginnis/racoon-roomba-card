@@ -38,20 +38,13 @@ const STYLES = `
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
-  .rc-conn {
-    font-size: 11px;
+  /* Header right: stacked status pills */
+  .rc-header-pills {
     display: flex;
-    align-items: center;
-    gap: 5px;
-    color: var(--disabled-text-color);
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
   }
-  .rc-conn-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--success-color, #1D9E75);
-    transition: background 0.3s;
-  }
-  .rc-conn-dot.offline { background: var(--error-color, #E24B4A); }
 
   /* ── Main row: robot left, info right ── */
   .rc-body {
@@ -214,12 +207,11 @@ const STYLES = `
     background: var(--divider-color, rgba(0,0,0,0.08));
   }
 
-  /* ── Bottom bar: buttons + pills ── */
+  /* ── Bottom bar: buttons only ── */
   .rc-bottom-bar {
     display: flex;
     align-items: center;
     padding: 8px 12px 12px;
-    gap: 8px;
   }
   /* ── Round control buttons ── */
   .rc-buttons {
@@ -229,14 +221,6 @@ const STYLES = `
     gap: 0;
   }
 
-  /* Status pills */
-  .rc-pills {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    align-items: flex-end;
-    flex-shrink: 0;
-  }
   .rc-pill {
     font-size: 9px; padding: 2px 7px;
     border-radius: 20px;
@@ -248,6 +232,8 @@ const STYLES = `
     white-space: nowrap;
   }
   .rc-pill-ok   { background: var(--secondary-background-color); color: var(--disabled-text-color); border-color: var(--divider-color); }
+  .rc-pill-conn { background: rgba(29,158,117,0.12); color: var(--success-color, #1D9E75); border-color: var(--success-color, #1D9E75); }
+  .rc-pill-offline { background: rgba(226,75,74,0.1); color: var(--error-color, #E24B4A); border-color: var(--error-color, #E24B4A); }
   .rc-pill-warn { background: #FAEEDA; color: #633806; border-color: #EF9F27; }
   .rc-pill-bad  { background: #FCEBEB; color: #791F1F; border-color: #E24B4A; }
   .rc-btn {
@@ -351,10 +337,11 @@ class RacoonRoombaCard extends HTMLElement {
       <ha-card>
         <div class="rc-header">
           <span class="rc-title" id="rc-title">${this._config.name}</span>
-          <span class="rc-conn">
-            <span class="rc-conn-dot" id="rc-dot"></span>
-            <span id="rc-conn-txt">Connecting...</span>
-          </span>
+          <div class="rc-header-pills">
+            <span class="rc-pill rc-pill-conn" id="rc-conn-pill">Connected</span>
+            <span class="rc-pill rc-pill-ok"   id="rc-bin-pill">Bin OK</span>
+            <span class="rc-pill rc-pill-ok"   id="rc-stuck-pill">Not Stuck</span>
+          </div>
         </div>
         <div id="rc-main">
           <div class="rc-body">
@@ -399,10 +386,6 @@ class RacoonRoombaCard extends HTMLElement {
               <button class="rc-btn" id="rc-btn-stop"   title="Stop">${SVG.stop}</button>
               <button class="rc-btn rc-btn-locate" id="rc-btn-locate" title="Locate (beep)">${SVG.locate}</button>
             </div>
-            <div class="rc-pills">
-              <span class="rc-pill rc-pill-ok" id="rc-bin-pill">Bin OK</span>
-              <span class="rc-pill rc-pill-ok" id="rc-stuck-pill">Not Stuck</span>
-            </div>
           </div>
         </div>
       </ha-card>
@@ -434,9 +417,10 @@ class RacoonRoombaCard extends HTMLElement {
     const info       = getStateInfo(state);
     const available  = state !== 'unavailable';
 
-    // Connection dot
-    shadow.getElementById('rc-dot').className     = 'rc-conn-dot' + (available ? '' : ' offline');
-    shadow.getElementById('rc-conn-txt').textContent = available ? 'Connected' : 'Offline';
+    // Connection pill
+    const connPill = shadow.getElementById('rc-conn-pill');
+    connPill.className   = 'rc-pill ' + (available ? 'rc-pill-conn' : 'rc-pill-offline');
+    connPill.textContent = available ? 'Connected' : 'Offline';
 
     // Ring + state label
     shadow.getElementById('rc-ring').className      = 'rc-ring rc-ring-active ' + (info.ring || '');
@@ -687,6 +671,55 @@ class RacoonRoombaCardEditor extends HTMLElement {
           </div>
         </div>
 
+        <!-- Optional Sensor Entities -->
+        <div>
+          <div class="section-title">Optional Sensors</div>
+          <div class="card-block">
+            <div class="select-row">
+              <label for="battery_entity">Battery Level</label>
+              <div class="hint">sensor.* — overrides built-in battery attribute</div>
+              <select id="battery_entity">
+                ${this._optionList('sensor')}
+              </select>
+            </div>
+            <div class="select-row">
+              <label for="mission_time_entity">Mission Time</label>
+              <div class="hint">sensor.* — minutes elapsed during current clean</div>
+              <select id="mission_time_entity">
+                ${this._optionList('sensor')}
+              </select>
+            </div>
+            <div class="select-row">
+              <label for="area_entity">Area Cleaned</label>
+              <div class="hint">sensor.* — square feet / metres cleaned this run</div>
+              <select id="area_entity">
+                ${this._optionList('sensor')}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Optional Binary Sensors -->
+        <div>
+          <div class="section-title">Optional Binary Sensors</div>
+          <div class="card-block">
+            <div class="select-row">
+              <label for="bin_entity">Bin Full</label>
+              <div class="hint">binary_sensor.* — shows Bin Full warning pill when on</div>
+              <select id="bin_entity">
+                ${this._optionList('binary_sensor')}
+              </select>
+            </div>
+            <div class="select-row">
+              <label for="stuck_entity">Robot Stuck</label>
+              <div class="hint">binary_sensor.* — shows Stuck! warning pill when on</div>
+              <select id="stuck_entity">
+                ${this._optionList('binary_sensor')}
+              </select>
+            </div>
+          </div>
+        </div>
+
       </div>
     `;
 
@@ -705,8 +738,13 @@ class RacoonRoombaCardEditor extends HTMLElement {
       if (el) el.value = val || '';
     };
 
-    set('name',   this._config.name);
-    set('entity', this._config.entity);
+    set('name',                this._config.name);
+    set('entity',              this._config.entity);
+    set('battery_entity',      this._config.battery_entity);
+    set('mission_time_entity', this._config.mission_time_entity);
+    set('area_entity',         this._config.area_entity);
+    set('bin_entity',          this._config.bin_entity);
+    set('stuck_entity',        this._config.stuck_entity);
   }
 
   // ── Event wiring ───────────────────────────────────────────────────────────
@@ -724,8 +762,13 @@ class RacoonRoombaCardEditor extends HTMLElement {
       });
     };
 
-    wire('name',   'name');
-    wire('entity', 'entity');
+    wire('name',                'name');
+    wire('entity',              'entity');
+    wire('battery_entity',      'battery_entity',      v => v || null);
+    wire('mission_time_entity', 'mission_time_entity', v => v || null);
+    wire('area_entity',         'area_entity',         v => v || null);
+    wire('bin_entity',          'bin_entity',          v => v || null);
+    wire('stuck_entity',        'stuck_entity',        v => v || null);
   }
 
   _set(key, value) {

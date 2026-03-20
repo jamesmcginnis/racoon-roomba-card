@@ -18,53 +18,93 @@
 
 const STYLES = `
   :host { display: block; }
-  ha-card { padding: 0; overflow: hidden; font-family: var(--primary-font-family, sans-serif); }
+  ha-card {
+    padding: 0;
+    overflow: hidden;
+    font-family: var(--primary-font-family, sans-serif);
+  }
 
   /* ── Header ── */
   .rc-header {
-    display: flex; flex-direction: row; align-items: flex-start;
-    justify-content: space-between; padding: 5px 11px 0; gap: 4px; cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px 0;
+    cursor: pointer;
   }
-  .rc-title {
-    font-size: 12px; font-weight: 500; color: var(--secondary-text-color);
-    letter-spacing: 0.04em; padding-top: 1px;
+  .rc-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--primary-text-color);
   }
-  .rc-header-pills {
-    display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0;
+  .rc-conn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--secondary-text-color);
   }
+  .rc-conn-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--success-color, #1D9E75);
+    transition: background 0.3s;
+    flex-shrink: 0;
+  }
+  .rc-conn-dot.offline { background: var(--error-color, #E24B4A); }
 
-  /* ── Body: robot left, info right ── */
+  /* ── Body ── */
   .rc-body {
-    padding: 5px 11px 0; display: flex; flex-direction: row; align-items: center; gap: 10px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 16px 12px;
   }
 
-  /* Robot */
-  .rc-robot-wrap { position: relative; flex-shrink: 0; width: 68px; height: 68px; }
-  .rc-ring { position: absolute; inset: 0; border-radius: 50%; box-sizing: border-box; }
-  .rc-ring-bg   { border: 3px solid var(--divider-color, rgba(0,0,0,0.12)); }
-  .rc-ring-active { border: 3px solid transparent; transition: border-color 0.4s; }
+  /* Robot circle */
+  .rc-robot-wrap {
+    position: relative;
+    flex-shrink: 0;
+    width: 72px; height: 72px;
+  }
+  .rc-ring {
+    position: absolute; inset: 0;
+    border-radius: 50%;
+    box-sizing: border-box;
+  }
+  .rc-ring-bg   { border: 2.5px solid var(--divider-color, rgba(0,0,0,0.12)); }
+  .rc-ring-active { border: 2.5px solid transparent; transition: border-color 0.4s; }
   .rc-ring-active.cleaning  { border-top-color: var(--success-color,#1D9E75); border-right-color: var(--success-color,#1D9E75); animation: rc-spin 1.4s linear infinite; }
   .rc-ring-active.returning { border-top-color: var(--warning-color,#BA7517); border-right-color: var(--warning-color,#BA7517); animation: rc-spin 2s linear infinite; }
   .rc-ring-active.error     { border-top-color: var(--error-color,#E24B4A);   border-right-color: var(--error-color,#E24B4A);   animation: rc-flash 0.8s ease-in-out infinite; }
   .rc-ring-active.docked    { border-color: var(--info-color,#378ADD); }
-  .rc-ring-active.paused    { border-top-color: var(--disabled-text-color,#888780); border-right-color: var(--disabled-text-color,#888780); }
+  .rc-ring-active.paused    { border-top-color: var(--disabled-text-color,#888); border-right-color: var(--disabled-text-color,#888); }
   @keyframes rc-spin  { to { transform: rotate(360deg); } }
   @keyframes rc-flash { 0%,100% { opacity:1; } 50% { opacity:0.25; } }
   @keyframes rc-icon-clean {
     0%   { transform: rotate(0deg)   scale(1);    opacity: 1;    }
-    25%  { transform: rotate(90deg)  scale(1.13); opacity: 0.78; }
+    25%  { transform: rotate(90deg)  scale(1.12); opacity: 0.75; }
     50%  { transform: rotate(180deg) scale(1);    opacity: 1;    }
-    75%  { transform: rotate(270deg) scale(1.13); opacity: 0.78; }
+    75%  { transform: rotate(270deg) scale(1.12); opacity: 0.75; }
     100% { transform: rotate(360deg) scale(1);    opacity: 1;    }
   }
   .rc-robot-inner {
     position: absolute; inset: 6px; border-radius: 50%;
-    background: var(--card-background-color,#fff); border: 1px solid var(--divider-color,rgba(0,0,0,0.12));
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: default;
+    background: var(--card-background-color, #fff);
+    border: 1px solid var(--divider-color, rgba(0,0,0,0.1));
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 2px;
+    cursor: default;
   }
-  #rc-robot-icon { display: flex; align-items: center; justify-content: center; transform-origin: center center; transition: opacity 0.4s; }
+  #rc-robot-icon {
+    display: flex; align-items: center; justify-content: center;
+    transform-origin: center center; transition: opacity 0.4s;
+  }
   #rc-robot-icon.cleaning { animation: rc-icon-clean 2.8s ease-in-out infinite; }
-  .rc-state-lbl { font-size: 8px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; transition: color 0.3s; }
+  .rc-state-badge {
+    font-size: 8px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; transition: color 0.3s;
+  }
   .rc-state-cleaning  { color: var(--success-color,#1D9E75); }
   .rc-state-docked    { color: var(--info-color,#378ADD); }
   .rc-state-returning { color: var(--warning-color,#BA7517); }
@@ -73,49 +113,55 @@ const STYLES = `
   .rc-state-idle      { color: var(--disabled-text-color); }
 
   /* Info column */
-  .rc-info { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-  .rc-info-row { display: flex; align-items: center; gap: 8px; }
-  .rc-metric { display: flex; flex-direction: column; gap: 0; }
-  .rc-metric-val { font-size: 14px; font-weight: 500; color: var(--primary-text-color); line-height: 1; }
-  .rc-metric-lbl { font-size: 8px; color: var(--disabled-text-color); letter-spacing: 0.04em; text-transform: uppercase; }
-  .rc-metric-divider { width: 1px; height: 22px; background: var(--divider-color,rgba(0,0,0,0.1)); flex-shrink: 0; }
-  .rc-battery-wrap { display: flex; flex-direction: column; gap: 2px; flex: 1; }
-  .rc-battery-top  { display: flex; align-items: center; justify-content: space-between; }
-  .rc-battery-lbl  { font-size: 8px; color: var(--disabled-text-color); letter-spacing: 0.04em; text-transform: uppercase; }
-  .rc-battery-pct  { font-size: 11px; font-weight: 500; color: var(--primary-text-color); }
-  .rc-battery-bar  { width: 100%; height: 4px; background: var(--divider-color,rgba(0,0,0,0.12)); border-radius: 3px; overflow: hidden; }
-  .rc-battery-fill { height: 100%; border-radius: 3px; transition: width 0.4s, background 0.4s; }
+  .rc-info { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 
-  /* Divider */
-  .rc-divider { margin: 5px 11px 0; height: 1px; background: var(--divider-color,rgba(0,0,0,0.08)); }
+  .rc-state-text {
+    font-size: 15px; font-weight: 500;
+    transition: color 0.3s;
+  }
 
-  /* Bottom bar */
-  .rc-bottom-bar { display: flex; align-items: center; padding: 3px 8px 7px; }
-  .rc-buttons { display: flex; justify-content: space-around; flex: 1; gap: 0; }
+  .rc-stats {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .rc-stat { font-size: 13px; font-weight: 500; color: var(--primary-text-color); }
+  .rc-stat-lbl { font-size: 10px; color: var(--disabled-text-color); }
+  .rc-stat-sep { font-size: 11px; color: var(--divider-color, rgba(0,0,0,0.3)); margin: 0 2px; }
+  .rc-bat-pct {
+    font-size: 13px; font-weight: 500;
+    transition: color 0.4s;
+  }
 
-  /* Pills */
-  .rc-pill { font-size: 9px; padding: 2px 6px; border-radius: 20px; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600; border: 1px solid; transition: all 0.2s; white-space: nowrap; }
-  .rc-pill-ok      { background: var(--secondary-background-color); color: var(--disabled-text-color); border-color: var(--divider-color); }
-  .rc-pill-conn    { background: rgba(29,158,117,0.12); color: var(--success-color,#1D9E75); border-color: var(--success-color,#1D9E75); }
-  .rc-pill-offline { background: rgba(226,75,74,0.1);  color: var(--error-color,#E24B4A);   border-color: var(--error-color,#E24B4A); }
+  .rc-pills-row { display: flex; gap: 5px; flex-wrap: wrap; }
+  .rc-pill {
+    font-size: 10px; padding: 2px 8px;
+    border-radius: 20px; font-weight: 600;
+    letter-spacing: 0.03em; border: 1px solid;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .rc-pill-ok      { background: var(--secondary-background-color); color: var(--secondary-text-color); border-color: var(--divider-color); }
   .rc-pill-warn    { background: #FAEEDA; color: #633806; border-color: #EF9F27; }
   .rc-pill-bad     { background: #FCEBEB; color: #791F1F; border-color: #E24B4A; }
 
-  /* Round buttons */
+  /* Divider + buttons */
+  .rc-divider { height: 1px; background: var(--divider-color,rgba(0,0,0,0.08)); margin: 0 16px; }
+  .rc-buttons { display: flex; justify-content: space-around; padding: 8px 12px 10px; }
   .rc-btn {
-    width: 38px; height: 38px; border-radius: 50%;
+    width: 40px; height: 40px; border-radius: 50%;
     border: 1px solid var(--divider-color,rgba(0,0,0,0.15));
-    background: var(--secondary-background-color,#f5f5f5); color: var(--primary-text-color);
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: background 0.12s, transform 0.1s, box-shadow 0.12s; font-family: inherit; padding: 0;
+    background: var(--secondary-background-color,#f5f5f5);
+    color: var(--primary-text-color); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.12s, transform 0.1s, box-shadow 0.12s;
+    font-family: inherit; padding: 0;
   }
   .rc-btn:hover   { background: var(--divider-color,rgba(0,0,0,0.1)); box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
   .rc-btn:active  { transform: scale(0.91); }
   .rc-btn[disabled] { opacity: 0.35; cursor: not-allowed; }
   .rc-btn.rc-btn-locate { color: var(--info-color,#378ADD); }
-  .rc-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
-
-  .rc-unavail { padding: 16px; text-align: center; color: var(--disabled-text-color); font-size: 13px; }
+  .rc-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
 `;
 
 const SVG = {
@@ -126,7 +172,7 @@ const SVG = {
   locate: `<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M8 1v3M8 12v3M1 8h3M12 8h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
 };
 
-const ROBOT_SVG = `<span id="rc-robot-icon"><svg width="26" height="26" viewBox="0 0 36 36" fill="none">
+const ROBOT_SVG = `<span id="rc-robot-icon"><svg width="28" height="28" viewBox="0 0 36 36" fill="none">
   <circle cx="18" cy="18" r="14" fill="none" stroke="var(--divider-color,rgba(0,0,0,0.2))" stroke-width="1.2"/>
   <circle cx="18" cy="18" r="8" fill="var(--divider-color,rgba(0,0,0,0.1))"/>
   <circle cx="18" cy="18" r="3" fill="var(--secondary-text-color,#888)"/>
@@ -174,10 +220,7 @@ class RacoonRoombaCard extends HTMLElement {
 
   set hass(hass) {
     this._hass = hass;
-    if (!this._built) {
-      this._build();
-      this._built = true;
-    }
+    if (!this._built) { this._build(); this._built = true; }
     this._update();
   }
 
@@ -187,79 +230,61 @@ class RacoonRoombaCard extends HTMLElement {
       <style>${STYLES}</style>
       <ha-card>
         <div class="rc-header" id="rc-header">
-          <span class="rc-title" id="rc-title">${this._config.name}</span>
-          <div class="rc-header-pills">
-            <span class="rc-pill rc-pill-conn" id="rc-conn-pill">Connected</span>
-            <span class="rc-pill rc-pill-ok"   id="rc-stuck-pill">Not Stuck</span>
-            <span class="rc-pill rc-pill-ok"   id="rc-bin-pill">Bin OK</span>
+          <span class="rc-name" id="rc-title">${this._config.name}</span>
+          <span class="rc-conn">
+            <span class="rc-conn-dot" id="rc-dot"></span>
+            <span id="rc-conn-txt">Connecting…</span>
+          </span>
+        </div>
+        <div class="rc-body">
+          <div class="rc-robot-wrap">
+            <div class="rc-ring rc-ring-bg"></div>
+            <div class="rc-ring rc-ring-active" id="rc-ring"></div>
+            <div class="rc-robot-inner">
+              ${ROBOT_SVG}
+              <span class="rc-state-badge" id="rc-state-lbl">—</span>
+            </div>
+          </div>
+          <div class="rc-info">
+            <span class="rc-state-text rc-state-idle" id="rc-state-text">—</span>
+            <div class="rc-stats">
+              <span class="rc-stat" id="rc-mssn">—</span><span class="rc-stat-lbl">min</span>
+              <span class="rc-stat-sep">·</span>
+              <span class="rc-stat" id="rc-sqft">—</span><span class="rc-stat-lbl">sqft</span>
+              <span class="rc-stat-sep">·</span>
+              <span class="rc-bat-pct" id="rc-bat-pct">—</span>
+            </div>
+            <div class="rc-pills-row">
+              <span class="rc-pill rc-pill-ok" id="rc-stuck-pill">Not Stuck</span>
+              <span class="rc-pill rc-pill-ok" id="rc-bin-pill">Bin OK</span>
+            </div>
           </div>
         </div>
-        <div id="rc-main">
-          <div class="rc-body">
-            <div class="rc-robot-wrap">
-              <div class="rc-ring rc-ring-bg"></div>
-              <div class="rc-ring rc-ring-active" id="rc-ring"></div>
-              <div class="rc-robot-inner" id="rc-robot-inner">
-                ${ROBOT_SVG}
-                <span class="rc-state-lbl" id="rc-state-lbl">—</span>
-              </div>
-            </div>
-            <div class="rc-info">
-              <div class="rc-info-row">
-                <div class="rc-metric">
-                  <span class="rc-metric-val" id="rc-mssn">—</span>
-                  <span class="rc-metric-lbl">Min</span>
-                </div>
-                <div class="rc-metric-divider"></div>
-                <div class="rc-metric">
-                  <span class="rc-metric-val" id="rc-sqft">—</span>
-                  <span class="rc-metric-lbl">Sq ft</span>
-                </div>
-                <div class="rc-metric-divider"></div>
-                <div class="rc-battery-wrap">
-                  <div class="rc-battery-top">
-                    <span class="rc-battery-lbl">Battery</span>
-                    <span class="rc-battery-pct" id="rc-bat-pct">—</span>
-                  </div>
-                  <div class="rc-battery-bar">
-                    <div class="rc-battery-fill" id="rc-bat-fill" style="width:0%"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="rc-divider"></div>
-          <div class="rc-bottom-bar">
-            <div class="rc-buttons">
-              <button class="rc-btn" id="rc-btn-start"  title="Start cleaning">${SVG.start}</button>
-              <button class="rc-btn" id="rc-btn-pause"  title="Pause">${SVG.pause}</button>
-              <button class="rc-btn" id="rc-btn-dock"   title="Return to dock">${SVG.dock}</button>
-              <button class="rc-btn" id="rc-btn-stop"   title="Stop">${SVG.stop}</button>
-              <button class="rc-btn rc-btn-locate" id="rc-btn-locate" title="Locate (beep)">${SVG.locate}</button>
-            </div>
-          </div>
+        <div class="rc-divider"></div>
+        <div class="rc-buttons">
+          <button class="rc-btn" id="rc-btn-start"  title="Start cleaning">${SVG.start}</button>
+          <button class="rc-btn" id="rc-btn-pause"  title="Pause">${SVG.pause}</button>
+          <button class="rc-btn" id="rc-btn-dock"   title="Return to dock">${SVG.dock}</button>
+          <button class="rc-btn" id="rc-btn-stop"   title="Stop">${SVG.stop}</button>
+          <button class="rc-btn rc-btn-locate" id="rc-btn-locate" title="Locate">${SVG.locate}</button>
         </div>
       </ha-card>
     `;
 
-        // Wire up buttons
-    const call = (svc, data = {}) => {
+    const call = (svc) => {
       if (!this._hass) return;
-      this._hass.callService('vacuum', svc, { entity_id: this._config.entity, ...data });
+      this._hass.callService('vacuum', svc, { entity_id: this._config.entity });
     };
-
     shadow.getElementById('rc-btn-start') .addEventListener('click', () => call('start'));
     shadow.getElementById('rc-btn-pause') .addEventListener('click', () => call('pause'));
     shadow.getElementById('rc-btn-dock')  .addEventListener('click', () => call('return_to_base'));
     shadow.getElementById('rc-btn-stop')  .addEventListener('click', () => call('stop'));
     shadow.getElementById('rc-btn-locate').addEventListener('click', () => call('locate'));
 
-    // Tap header → open HA more-info dialog
     shadow.getElementById('rc-header').addEventListener('click', () => {
       this.dispatchEvent(new CustomEvent('hass-more-info', {
         detail: { entityId: this._config.entity },
-        bubbles: true,
-        composed: true,
+        bubbles: true, composed: true,
       }));
     });
   }
@@ -269,40 +294,44 @@ class RacoonRoombaCard extends HTMLElement {
     const cfg    = this._config;
     const shadow = this.shadowRoot;
     const vacuum = hass.states[cfg.entity];
-
     if (!vacuum) return;
 
-    const state      = vacuum.state;
-    const attrs      = vacuum.attributes || {};
-    const info       = getStateInfo(state);
-    const available  = state !== 'unavailable';
+    const state     = vacuum.state;
+    const attrs     = vacuum.attributes || {};
+    const info      = getStateInfo(state);
+    const available = state !== 'unavailable';
 
-    // Connection pill
-    const connPill = shadow.getElementById('rc-conn-pill');
-    connPill.className   = 'rc-pill ' + (available ? 'rc-pill-conn' : 'rc-pill-offline');
-    connPill.textContent = available ? 'Connected' : 'Offline';
+    // Connection
+    shadow.getElementById('rc-dot').className      = 'rc-conn-dot' + (available ? '' : ' offline');
+    shadow.getElementById('rc-conn-txt').textContent = available ? 'Connected' : 'Offline';
 
-    // Ring + state label
-    shadow.getElementById('rc-ring').className      = 'rc-ring rc-ring-active ' + (info.ring || '');
-    const icon = shadow.getElementById('rc-robot-icon'); if (icon) icon.className = state === 'cleaning' ? 'cleaning' : '';
-    const lbl = shadow.getElementById('rc-state-lbl');
-    lbl.className   = 'rc-state-lbl ' + info.cls;
-    lbl.textContent = info.label;
+    // Ring + state badge inside circle
+    shadow.getElementById('rc-ring').className = 'rc-ring rc-ring-active ' + (info.ring || '');
+    const icon = shadow.getElementById('rc-robot-icon');
+    if (icon) icon.className = state === 'cleaning' ? 'cleaning' : '';
+    const badge = shadow.getElementById('rc-state-lbl');
+    badge.className   = 'rc-state-badge ' + info.cls;
+    badge.textContent = info.label;
 
-    // Battery
-    const batEnt  = cfg.battery_entity ? hass.states[cfg.battery_entity] : null;
-    const batPct  = batEnt ? parseInt(batEnt.state) : attrs.battery_level;
-    const batEl   = shadow.getElementById('rc-bat-fill');
+    // State text in info column
+    const stateText = shadow.getElementById('rc-state-text');
+    stateText.className   = 'rc-state-text ' + info.cls;
+    stateText.textContent = info.label;
+
+    // Battery — plain percentage, colored only when low
+    const batEnt = cfg.battery_entity ? hass.states[cfg.battery_entity] : null;
+    const batPct = batEnt ? parseInt(batEnt.state) : attrs.battery_level;
+    const batEl  = shadow.getElementById('rc-bat-pct');
     if (batPct != null && !isNaN(batPct)) {
-      shadow.getElementById('rc-bat-pct').textContent  = batPct + '%';
-      batEl.style.width      = batPct + '%';
-      batEl.style.background = batPct > 50
-        ? 'var(--success-color, #1D9E75)'
+      batEl.textContent = batPct + '%';
+      batEl.style.color = batPct > 40
+        ? 'var(--secondary-text-color)'
         : batPct > 20
           ? 'var(--warning-color, #BA7517)'
           : 'var(--error-color, #E24B4A)';
     } else {
-      shadow.getElementById('rc-bat-pct').textContent = '—';
+      batEl.textContent = '—';
+      batEl.style.color = '';
     }
 
     // Mission time
@@ -315,37 +344,32 @@ class RacoonRoombaCard extends HTMLElement {
     shadow.getElementById('rc-sqft').textContent =
       areaEnt ? areaEnt.state : (attrs.sqft_cleaned ?? '—');
 
-    // Bin full
-    const binEnt = cfg.bin_entity ? hass.states[cfg.bin_entity] : null;
+    // Stuck pill
+    const stuckEnt  = cfg.stuck_entity ? hass.states[cfg.stuck_entity] : null;
+    const stuck     = stuckEnt ? stuckEnt.state === 'on' : state === 'error';
+    const stuckPill = shadow.getElementById('rc-stuck-pill');
+    stuckPill.className   = 'rc-pill ' + (stuck ? 'rc-pill-bad' : 'rc-pill-ok');
+    stuckPill.textContent = stuck ? 'Stuck!' : 'Not Stuck';
+
+    // Bin pill
+    const binEnt  = cfg.bin_entity ? hass.states[cfg.bin_entity] : null;
     const binFull = binEnt ? binEnt.state === 'on' : attrs.bin_full;
     const binPill = shadow.getElementById('rc-bin-pill');
     binPill.className   = 'rc-pill ' + (binFull ? 'rc-pill-warn' : 'rc-pill-ok');
     binPill.textContent = binFull ? 'Bin Full' : 'Bin OK';
 
-    // Stuck
-    const stuckEnt = cfg.stuck_entity ? hass.states[cfg.stuck_entity] : null;
-    const stuck    = stuckEnt ? stuckEnt.state === 'on' : state === 'error';
-    const stuckPill = shadow.getElementById('rc-stuck-pill');
-    stuckPill.className   = 'rc-pill ' + (stuck ? 'rc-pill-bad' : 'rc-pill-ok');
-    stuckPill.textContent = stuck ? 'Stuck!' : 'Not Stuck';
-
-    // Disable buttons when unavailable
+    // Buttons
     ['start','pause','dock','stop','locate'].forEach(id => {
       const btn = shadow.getElementById('rc-btn-' + id);
       if (btn) btn.disabled = !available;
     });
   }
 
-  getCardSize() { return 4; }
-
-  static getConfigElement() {
-    return document.createElement('racoon-roomba-card-editor');
-  }
-
-  static getStubConfig() {
-    return { entity: 'vacuum.roomba', name: 'Roomba' };
-  }
+  getCardSize() { return 3; }
+  static getConfigElement() { return document.createElement('racoon-roomba-card-editor'); }
+  static getStubConfig()    { return { entity: 'vacuum.roomba', name: 'Roomba' }; }
 }
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Visual Editor

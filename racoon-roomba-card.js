@@ -10,8 +10,6 @@
  *      entity: vacuum.roomba          # required
  *      name: Roomba                   # optional
  *      battery_entity: sensor.roomba_battery           # optional
- *      bin_entity: binary_sensor.roomba_bin_full       # optional
- *      stuck_entity: binary_sensor.roomba_stuck        # optional
  */
 
 const STYLES = `
@@ -21,19 +19,17 @@ const STYLES = `
   /* ── Header ── */
   .rc-header {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 10px 12px 0; cursor: pointer; gap: 8px;
+    padding: 8px 12px 0; cursor: pointer; gap: 8px;
   }
-  .rc-name { font-size: 13px; font-weight: 500; color: var(--primary-text-color); flex-shrink: 0; }
 
   /* Right pill strip */
   .rc-header-right { display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; }
 
-  /* All pills share one style */
+  /* All pills */
   .rc-pill {
     font-size: 9px; padding: 2px 7px; border-radius: 20px;
     font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
     border: 1px solid; transition: all 0.2s; white-space: nowrap;
-    display: inline-flex; align-items: center; gap: 3px;
   }
   .rc-pill-ok      { background: var(--secondary-background-color); color: var(--secondary-text-color); border-color: var(--divider-color); }
   .rc-pill-conn    { background: rgba(29,158,117,0.12); color: var(--success-color,#1D9E75); border-color: var(--success-color,#1D9E75); }
@@ -41,15 +37,11 @@ const STYLES = `
   .rc-pill-warn    { background: #FAEEDA; color: #633806; border-color: #EF9F27; }
   .rc-pill-bad     { background: #FCEBEB; color: #791F1F; border-color: #E24B4A; }
 
-  /* Battery pill uses a tiny inline SVG bar */
-  .rc-bat-bar-bg   { fill: none; }
-  .rc-bat-bar-fill { transition: width 0.4s; }
-
-  /* ── Body ── */
-  .rc-body { display: flex; align-items: center; gap: 12px; padding: 8px 12px 10px; }
+  /* ── Body: just the robot circle, centred ── */
+  .rc-body { display: flex; justify-content: center; padding: 8px 12px 10px; }
 
   /* Robot circle */
-  .rc-robot-wrap { position: relative; flex-shrink: 0; width: 64px; height: 64px; }
+  .rc-robot-wrap { position: relative; width: 72px; height: 72px; }
   .rc-ring { position: absolute; inset: 0; border-radius: 50%; box-sizing: border-box; }
   .rc-ring-bg     { border: 2.5px solid var(--divider-color,rgba(0,0,0,0.12)); }
   .rc-ring-active { border: 2.5px solid transparent; transition: border-color 0.4s; }
@@ -71,23 +63,19 @@ const STYLES = `
     position: absolute; inset: 5px; border-radius: 50%;
     background: var(--card-background-color,#fff);
     border: 1px solid var(--divider-color,rgba(0,0,0,0.1));
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
     cursor: default;
   }
   #rc-robot-icon { display: flex; align-items: center; justify-content: center; transform-origin: center; transition: opacity 0.4s; }
   #rc-robot-icon.cleaning { animation: rc-icon-clean 2.8s ease-in-out infinite; }
-  .rc-state-badge { font-size: 7px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; transition: color 0.3s; }
 
-  /* State colours */
-  .rc-state-cleaning  { color: var(--success-color,#1D9E75); }
-  .rc-state-docked    { color: var(--info-color,#378ADD); }
-  .rc-state-returning { color: var(--warning-color,#BA7517); }
-  .rc-state-paused    { color: var(--secondary-text-color); }
-  .rc-state-error     { color: var(--error-color,#E24B4A); }
-  .rc-state-idle      { color: var(--disabled-text-color); }
-
-  /* State text beside robot */
-  .rc-state-text { font-size: 15px; font-weight: 500; transition: color 0.3s; }
+  /* Name label inside circle */
+  .rc-inner-name {
+    font-size: 7px; font-weight: 600; letter-spacing: 0.05em;
+    color: var(--secondary-text-color);
+    text-align: center; max-width: 48px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
 
   /* Divider + buttons */
   .rc-divider { height: 1px; background: var(--divider-color,rgba(0,0,0,0.08)); margin: 0 12px; }
@@ -155,8 +143,6 @@ class RacoonRoombaCard extends HTMLElement {
       entity:              config.entity,
       name:                config.name || 'Roomba',
       battery_entity: config.battery_entity || null,
-      bin_entity:     config.bin_entity     || null,
-      stuck_entity:   config.stuck_entity   || null,
     };
   }
 
@@ -172,12 +158,9 @@ class RacoonRoombaCard extends HTMLElement {
       <style>${STYLES}</style>
       <ha-card>
         <div class="rc-header" id="rc-header">
-          <span class="rc-name" id="rc-title">${this._config.name}</span>
           <div class="rc-header-right">
-            <span class="rc-pill rc-pill-ok" id="rc-bat-pill">— %</span>
-            <span class="rc-pill rc-pill-ok" id="rc-stuck-pill">Not Stuck</span>
-            <span class="rc-pill rc-pill-ok" id="rc-bin-pill">Bin OK</span>
-            <span class="rc-pill rc-pill-conn" id="rc-conn-pill">Connected</span>
+            <span class="rc-pill rc-pill-ok"   id="rc-bat-pill">—</span>
+            <span class="rc-pill rc-pill-conn"  id="rc-conn-pill">Connected</span>
           </div>
         </div>
         <div class="rc-body">
@@ -186,10 +169,9 @@ class RacoonRoombaCard extends HTMLElement {
             <div class="rc-ring rc-ring-active" id="rc-ring"></div>
             <div class="rc-robot-inner">
               ${ROBOT_SVG}
-              <span class="rc-state-badge" id="rc-state-lbl">—</span>
+              <span class="rc-inner-name" id="rc-inner-name">${this._config.name}</span>
             </div>
           </div>
-          <span class="rc-state-text rc-state-idle" id="rc-state-text">—</span>
         </div>
         <div class="rc-divider"></div>
         <div class="rc-buttons">
@@ -249,42 +231,17 @@ class RacoonRoombaCard extends HTMLElement {
     const batPct  = batEnt ? parseInt(batEnt.state) : attrs.battery_level;
     const batPill = shadow.getElementById('rc-bat-pill');
     if (batPct != null && !isNaN(batPct)) {
-      const colour = batPct > 40 ? 'rc-pill-ok'
-                   : batPct > 20 ? 'rc-pill-warn'
-                                 : 'rc-pill-bad';
-      batPill.className   = 'rc-pill ' + colour;
+      batPill.className   = 'rc-pill ' + (batPct > 40 ? 'rc-pill-ok' : batPct > 20 ? 'rc-pill-warn' : 'rc-pill-bad');
       batPill.textContent = batPct + '%';
     } else {
       batPill.className   = 'rc-pill rc-pill-ok';
       batPill.textContent = '—';
     }
 
-    // Ring + badge in circle
+    // Ring animation
     shadow.getElementById('rc-ring').className = 'rc-ring rc-ring-active ' + (info.ring || '');
     const icon = shadow.getElementById('rc-robot-icon');
     if (icon) icon.className = state === 'cleaning' ? 'cleaning' : '';
-    const badge = shadow.getElementById('rc-state-lbl');
-    badge.className   = 'rc-state-badge ' + info.cls;
-    badge.textContent = info.label;
-
-    // State text
-    const stateText = shadow.getElementById('rc-state-text');
-    stateText.className   = 'rc-state-text ' + info.cls;
-    stateText.textContent = info.label;
-
-    // Stuck pill
-    const stuckEnt  = cfg.stuck_entity ? hass.states[cfg.stuck_entity] : null;
-    const stuck     = stuckEnt ? stuckEnt.state === 'on' : state === 'error';
-    const stuckPill = shadow.getElementById('rc-stuck-pill');
-    stuckPill.className   = 'rc-pill ' + (stuck ? 'rc-pill-bad' : 'rc-pill-ok');
-    stuckPill.textContent = stuck ? 'Stuck!' : 'Not Stuck';
-
-    // Bin pill
-    const binEnt  = cfg.bin_entity ? hass.states[cfg.bin_entity] : null;
-    const binFull = binEnt ? binEnt.state === 'on' : attrs.bin_full;
-    const binPill = shadow.getElementById('rc-bin-pill');
-    binPill.className   = 'rc-pill ' + (binFull ? 'rc-pill-warn' : 'rc-pill-ok');
-    binPill.textContent = binFull ? 'Bin Full' : 'Bin OK';
 
     // Buttons
     ['start','pause','dock','stop','locate'].forEach(id => {
@@ -496,27 +453,6 @@ class RacoonRoombaCardEditor extends HTMLElement {
           </div>
         </div>
 
-        <!-- Optional Binary Sensors -->
-        <div>
-          <div class="section-title">Optional Binary Sensors</div>
-          <div class="card-block">
-            <div class="select-row">
-              <label for="bin_entity">Bin Full</label>
-              <div class="hint">binary_sensor.* — shows Bin Full warning pill when on</div>
-              <select id="bin_entity">
-                ${this._optionList('binary_sensor')}
-              </select>
-            </div>
-            <div class="select-row">
-              <label for="stuck_entity">Robot Stuck</label>
-              <div class="hint">binary_sensor.* — shows Stuck! warning pill when on</div>
-              <select id="stuck_entity">
-                ${this._optionList('binary_sensor')}
-              </select>
-            </div>
-          </div>
-        </div>
-
       </div>
     `;
 
@@ -538,8 +474,6 @@ class RacoonRoombaCardEditor extends HTMLElement {
     set('name',                this._config.name);
     set('entity',              this._config.entity);
     set('battery_entity', this._config.battery_entity);
-    set('bin_entity',      this._config.bin_entity);
-    set('stuck_entity',        this._config.stuck_entity);
   }
 
   // ── Event wiring ───────────────────────────────────────────────────────────
@@ -560,8 +494,6 @@ class RacoonRoombaCardEditor extends HTMLElement {
     wire('name',                'name');
     wire('entity',              'entity');
     wire('battery_entity', 'battery_entity', v => v || null);
-    wire('bin_entity',      'bin_entity',      v => v || null);
-    wire('stuck_entity',        'stuck_entity',        v => v || null);
   }
 
   _set(key, value) {

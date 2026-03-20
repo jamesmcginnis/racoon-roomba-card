@@ -30,8 +30,8 @@ const STYLES = `
     flex-direction: row;
     align-items: flex-start;
     justify-content: space-between;
-    padding: 8px 14px 0;
-    gap: 6px;
+    padding: 6px 12px 0;
+    gap: 4px;
     cursor: pointer;
   }
   .rc-title {
@@ -39,20 +39,20 @@ const STYLES = `
     font-weight: 500;
     color: var(--secondary-text-color);
     letter-spacing: 0.04em;
-    padding-top: 2px;
+    padding-top: 1px;
   }
   /* Right column: stacked pills */
   .rc-header-pills {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 3px;
+    gap: 2px;
     flex-shrink: 0;
   }
 
   /* ── Main row: robot left, info right ── */
   .rc-body {
-    padding: 8px 14px 0;
+    padding: 6px 12px 0;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -63,7 +63,7 @@ const STYLES = `
   .rc-robot-wrap {
     position: relative;
     flex-shrink: 0;
-    width: 90px; height: 90px;
+    width: 76px; height: 76px;
   }
   .rc-ring {
     position: absolute; inset: 0;
@@ -149,7 +149,7 @@ const STYLES = `
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
     min-width: 0;
   }
   .rc-info-row {
@@ -206,7 +206,7 @@ const STYLES = `
 
   /* ── Divider ── */
   .rc-divider {
-    margin: 8px 14px 0;
+    margin: 6px 12px 0;
     height: 1px;
     background: var(--divider-color, rgba(0,0,0,0.08));
   }
@@ -215,7 +215,7 @@ const STYLES = `
   .rc-bottom-bar {
     display: flex;
     align-items: center;
-    padding: 6px 10px 10px;
+    padding: 4px 10px 8px;
   }
   /* ── Round control buttons ── */
   .rc-buttons {
@@ -241,7 +241,7 @@ const STYLES = `
   .rc-pill-warn { background: #FAEEDA; color: #633806; border-color: #EF9F27; }
   .rc-pill-bad  { background: #FCEBEB; color: #791F1F; border-color: #E24B4A; }
   .rc-btn {
-    width: 46px; height: 46px;
+    width: 40px; height: 40px;
     border-radius: 50%;
     border: 1px solid var(--divider-color, rgba(0,0,0,0.15));
     background: var(--secondary-background-color, #f5f5f5);
@@ -261,7 +261,7 @@ const STYLES = `
   .rc-btn:active  { transform: scale(0.91); }
   .rc-btn[disabled] { opacity: 0.35; cursor: not-allowed; }
   .rc-btn.rc-btn-locate { color: var(--info-color, #378ADD); }
-  .rc-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .rc-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
 
   .rc-unavail {
     padding: 20px 16px;
@@ -279,7 +279,7 @@ const SVG = {
   locate: `<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M8 1v3M8 12v3M1 8h3M12 8h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
 };
 
-const ROBOT_SVG = `<span id="rc-robot-icon"><svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+const ROBOT_SVG = `<span id="rc-robot-icon"><svg width="30" height="30" viewBox="0 0 36 36" fill="none">
   <circle cx="18" cy="18" r="14" fill="none" stroke="var(--divider-color,rgba(0,0,0,0.2))" stroke-width="1.2"/>
   <circle cx="18" cy="18" r="8" fill="var(--divider-color,rgba(0,0,0,0.1))"/>
   <circle cx="18" cy="18" r="3" fill="var(--secondary-text-color,#888)"/>
@@ -343,8 +343,8 @@ class RacoonRoombaCard extends HTMLElement {
           <span class="rc-title" id="rc-title">${this._config.name}</span>
           <div class="rc-header-pills">
             <span class="rc-pill rc-pill-conn" id="rc-conn-pill">Connected</span>
-            <span class="rc-pill rc-pill-ok"   id="rc-bin-pill">Bin OK</span>
             <span class="rc-pill rc-pill-ok"   id="rc-stuck-pill">Not Stuck</span>
+            <span class="rc-pill rc-pill-ok"   id="rc-bin-pill">Bin OK</span>
           </div>
         </div>
         <div id="rc-main">

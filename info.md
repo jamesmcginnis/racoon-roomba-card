@@ -28,6 +28,8 @@ This card is built exclusively for the **ha-roomba-custom** integration:
 
 👉 [github.com/jamesmcginnis/ha-roomba-custom](https://github.com/jamesmcginnis/ha-roomba-custom)
 
+[![Add to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=jamesmcginnis&repository=racoon-roomba-card&category=plugin)
+
 ## Minimal configuration
 
 ```yaml

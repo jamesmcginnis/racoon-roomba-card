@@ -49,12 +49,12 @@ const STYLES = `
   .rc-ring-active.paused    { border-top-color: var(--disabled-text-color,#888); border-right-color: var(--disabled-text-color,#888); }
   @keyframes rc-spin  { to { transform: rotate(360deg); } }
   @keyframes rc-flash { 0%,100% { opacity:1; } 50% { opacity:0.25; } }
-  @keyframes rc-icon-clean {
-    0%   { transform: rotate(0deg)   scale(1);    opacity:1;    }
-    25%  { transform: rotate(90deg)  scale(1.12); opacity:0.75; }
-    50%  { transform: rotate(180deg) scale(1);    opacity:1;    }
-    75%  { transform: rotate(270deg) scale(1.12); opacity:0.75; }
-    100% { transform: rotate(360deg) scale(1);    opacity:1;    }
+  @keyframes rc-icon-breathe {
+    0%   { transform: rotate(0deg)   scale(1);    opacity:1;   }
+    25%  { transform: rotate(90deg)  scale(1.18); opacity:0.7; }
+    50%  { transform: rotate(180deg) scale(1);    opacity:1;   }
+    75%  { transform: rotate(270deg) scale(1.18); opacity:0.7; }
+    100% { transform: rotate(360deg) scale(1);    opacity:1;   }
   }
   .rc-robot-inner {
     position: absolute; inset: 5px; border-radius: 50%;
@@ -64,7 +64,7 @@ const STYLES = `
     cursor: default;
   }
   #rc-robot-icon { display: flex; align-items: center; justify-content: center; transform-origin: center; transition: opacity 0.4s; }
-  #rc-robot-icon.cleaning { animation: rc-icon-clean 2.8s ease-in-out infinite; }
+  #rc-robot-icon.cleaning { animation: rc-icon-breathe 1.6s ease-in-out infinite; }
 
   /* Name label inside circle */
   .rc-inner-name {
